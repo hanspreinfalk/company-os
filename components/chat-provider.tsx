@@ -46,7 +46,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const { messages, sendMessage, setMessages, status } = useChat({
     transport,
-    maxSteps: 10,
   });
 
   const [messageTimestamps, setMessageTimestamps] = useState<

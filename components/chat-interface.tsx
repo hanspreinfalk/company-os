@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
 import { formatMessageTime } from "@/lib/format";
-import { UIMessage } from "ai";
+import { getToolName, isToolUIPart, type UIMessage } from "ai";
 import { ArrowUp, Check, Copy, Loader2 } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -247,19 +247,12 @@ function getMessageText(message: UIMessage): string {
     .trim();
 }
 
-function getToolNameFromPart(
-  part: UIMessage["parts"][number] | undefined
-): string | undefined {
-  if (!part || part.type !== "tool-invocation") return undefined;
-  return part.toolInvocation.toolName;
-}
-
 function getMessageSignature(message: UIMessage): string {
   return message.parts
     .map((part) => {
       if (part.type === "text") return `t:${part.text}`;
-      if (part.type === "tool-invocation") {
-        return `i:${part.toolInvocation.toolName}:${part.toolInvocation.state}`;
+      if (isToolUIPart(part)) {
+        return `i:${getToolName(part)}:${part.state}`;
       }
       return part.type;
     })
@@ -283,7 +276,6 @@ const ChatMessage = React.memo(function ChatMessage({
   timestamp,
 }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
-  const currentStep = message.parts[message.parts.length - 1];
   const isUser = message.role === "user";
   const messageText = getMessageText(message);
 
@@ -311,16 +303,39 @@ const ChatMessage = React.memo(function ChatMessage({
           "max-w-[85%] text-base leading-relaxed sm:max-w-[82%]",
           isUser
             ? "bg-primary text-primary-foreground rounded-2xl px-3.5 py-2.5"
-            : "text-foreground py-1 pr-0.5 pl-4"
+            : "text-foreground flex flex-col gap-2.5 py-1 pr-0.5 pl-4"
         )}
       >
-        {currentStep?.type === "text" && (
-          <Markdown inverted={isUser} className="first:prose-p:mt-0 last:prose-p:mb-0">
-            {currentStep.text}
+        {isUser ? (
+          <Markdown inverted className="first:prose-p:mt-0 last:prose-p:mb-0">
+            {messageText}
           </Markdown>
-        )}
-        {currentStep?.type === "tool-invocation" && (
-          <ThinkingShimmer label={getToolLabel(getToolNameFromPart(currentStep))} />
+        ) : (
+          message.parts.map((part, index) => {
+            if (part.type === "text" && part.text.trim()) {
+              return (
+                <Markdown
+                  key={index}
+                  className="first:prose-p:mt-0 last:prose-p:mb-0"
+                >
+                  {part.text}
+                </Markdown>
+              );
+            }
+            if (isToolUIPart(part)) {
+              const done =
+                part.state === "output-available" ||
+                part.state === "output-error";
+              return (
+                <ToolStep
+                  key={index}
+                  label={getToolLabel(getToolName(part))}
+                  running={!done}
+                />
+              );
+            }
+            return null;
+          })
         )}
       </div>
 
@@ -335,6 +350,18 @@ const ChatMessage = React.memo(function ChatMessage({
     </div>
   );
 }, chatMessagePropsAreEqual);
+
+function ToolStep({ label, running }: { label: string; running: boolean }) {
+  if (running) {
+    return <ThinkingShimmer label={label} />;
+  }
+  return (
+    <span className="text-muted-foreground inline-flex items-center gap-1.5 text-sm font-medium">
+      <Check className="size-3.5" />
+      {label}
+    </span>
+  );
+}
 
 function MessageMeta({
   timestamp,
