@@ -78,9 +78,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     trackedMessageIds.current.clear();
   }, [setMessages]);
 
+  const messageTimestampsRef = useRef(messageTimestamps);
+  messageTimestampsRef.current = messageTimestamps;
+
   const getMessageTimestamp = useCallback(
-    (messageId: string) => messageTimestamps[messageId],
-    [messageTimestamps]
+    (messageId: string) => messageTimestampsRef.current[messageId],
+    []
   );
 
   const value = useMemo(

@@ -31,8 +31,14 @@ export function ChatInterface() {
   const [input, setInput] = useState("");
   const currentUser = useQuery(api.users.getCurrentUser);
   const greetingName = currentUser?.name ?? "there";
-  const { messages, sendMessage, status, isProcessing, hasConversation } =
-    useChatContext();
+  const {
+    messages,
+    sendMessage,
+    status,
+    isProcessing,
+    hasConversation,
+    getMessageTimestamp,
+  } = useChatContext();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastMessageIsUser =
@@ -95,7 +101,11 @@ export function ChatInterface() {
       <div className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6">
         <div className="mx-auto w-full max-w-3xl space-y-6 py-4">
           {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
+            <ChatMessage
+              key={message.id}
+              message={message}
+              timestamp={getMessageTimestamp(message.id)}
+            />
           ))}
           {status === "submitted" && lastMessageIsUser && <Loader />}
           {status === "error" && <ErrorMessage />}
@@ -226,6 +236,7 @@ function ChatComposer({
 
 interface ChatMessageProps {
   message: UIMessage;
+  timestamp?: number;
 }
 
 function getMessageText(message: UIMessage): string {
@@ -236,13 +247,45 @@ function getMessageText(message: UIMessage): string {
     .trim();
 }
 
-function ChatMessage({ message }: ChatMessageProps) {
-  const { getMessageTimestamp } = useChatContext();
+function getToolNameFromPart(
+  part: UIMessage["parts"][number] | undefined
+): string | undefined {
+  if (!part || part.type !== "tool-invocation") return undefined;
+  return part.toolInvocation.toolName;
+}
+
+function getMessageSignature(message: UIMessage): string {
+  return message.parts
+    .map((part) => {
+      if (part.type === "text") return `t:${part.text}`;
+      if (part.type === "tool-invocation") {
+        return `i:${part.toolInvocation.toolName}:${part.toolInvocation.state}`;
+      }
+      return part.type;
+    })
+    .join("|");
+}
+
+function chatMessagePropsAreEqual(
+  prev: ChatMessageProps,
+  next: ChatMessageProps
+): boolean {
+  return (
+    prev.message.id === next.message.id &&
+    prev.message.role === next.message.role &&
+    prev.timestamp === next.timestamp &&
+    getMessageSignature(prev.message) === getMessageSignature(next.message)
+  );
+}
+
+const ChatMessage = React.memo(function ChatMessage({
+  message,
+  timestamp,
+}: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
   const currentStep = message.parts[message.parts.length - 1];
   const isUser = message.role === "user";
   const messageText = getMessageText(message);
-  const timestamp = getMessageTimestamp(message.id);
 
   async function handleCopy() {
     if (!messageText) return;
@@ -277,15 +320,7 @@ function ChatMessage({ message }: ChatMessageProps) {
           </Markdown>
         )}
         {currentStep?.type === "tool-invocation" && (
-          <ThinkingShimmer
-            label={getToolLabel(
-              "toolName" in currentStep
-                ? (currentStep.toolName as string)
-                : "toolInvocation" in currentStep
-                  ? currentStep.toolInvocation?.toolName
-                  : undefined
-            )}
-          />
+          <ThinkingShimmer label={getToolLabel(getToolNameFromPart(currentStep))} />
         )}
       </div>
 
@@ -299,7 +334,7 @@ function ChatMessage({ message }: ChatMessageProps) {
       )}
     </div>
   );
-}
+}, chatMessagePropsAreEqual);
 
 function MessageMeta({
   timestamp,
@@ -363,13 +398,17 @@ function getToolLabel(toolName?: string) {
   }
 }
 
-function ThinkingShimmer({ label = "Thinking" }: { label?: string }) {
+const ThinkingShimmer = React.memo(function ThinkingShimmer({
+  label = "Thinking",
+}: {
+  label?: string;
+}) {
   return (
     <Shimmer as="span" className="text-base font-medium" duration={1.5}>
       {label}
     </Shimmer>
   );
-}
+});
 
 function ErrorMessage() {
   return (

@@ -86,7 +86,7 @@ export function NotePreview({ noteId }: NotePreviewProps) {
   }
 
   return (
-    <article className="bg-card relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/50 shadow-xs">
+    <article className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
       {viewMode === "view" ? (
         <>
           <Button

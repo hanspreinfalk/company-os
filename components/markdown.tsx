@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { memo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -9,7 +10,7 @@ interface MarkdownProps {
   inverted?: boolean;
 }
 
-export default function Markdown({
+function Markdown({
   children,
   className,
   inverted = false,
@@ -77,3 +78,5 @@ export default function Markdown({
     </div>
   );
 }
+
+export default memo(Markdown);

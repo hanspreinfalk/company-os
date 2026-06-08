@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { useQuery } from "convex/react";
 import { FileText, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -55,33 +60,46 @@ export function NotesPage() {
   const isLoading = notes === undefined;
 
   return (
-    <div className="flex h-full min-h-0 w-full gap-4">
-      {/* File tree sidebar */}
-      <aside className="bg-card flex w-56 shrink-0 flex-col overflow-hidden rounded-xl border border-border/50 shadow-xs">
-        <div className="min-h-0 flex-1 overflow-y-auto p-3">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="text-muted-foreground size-4 animate-spin" />
-            </div>
-          ) : (
-            <FolderTree
-              notes={notes}
-              selectedNoteId={selectedNoteId}
-              onSelectNote={handleSelectNote}
-              onNoteDeleted={handleNoteDeleted}
-            />
-          )}
-        </div>
-      </aside>
+    <div className="bg-card h-full min-h-0 w-full overflow-hidden rounded-xl border border-border/50 shadow-xs">
+      <ResizablePanelGroup
+        direction="horizontal"
+        autoSaveId="notes-layout"
+        className="h-full"
+      >
+        {/* File tree sidebar */}
+        <ResizablePanel
+          defaultSize={22}
+          minSize={14}
+          maxSize={45}
+          className="flex flex-col overflow-hidden"
+        >
+          <div className="min-h-0 flex-1 overflow-y-auto p-3">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="text-muted-foreground size-4 animate-spin" />
+              </div>
+            ) : (
+              <FolderTree
+                notes={notes}
+                selectedNoteId={selectedNoteId}
+                onSelectNote={handleSelectNote}
+                onNoteDeleted={handleNoteDeleted}
+              />
+            )}
+          </div>
+        </ResizablePanel>
 
-      {/* Preview panel */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {selectedNoteId ? (
-          <NotePreview noteId={selectedNoteId} />
-        ) : (
-          <EmptyPreview />
-        )}
-      </div>
+        <ResizableHandle className="bg-border/50" />
+
+        {/* Preview panel */}
+        <ResizablePanel defaultSize={78} className="flex flex-col overflow-hidden">
+          {selectedNoteId ? (
+            <NotePreview noteId={selectedNoteId} />
+          ) : (
+            <EmptyPreview />
+          )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

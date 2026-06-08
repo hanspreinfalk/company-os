@@ -22,13 +22,10 @@ const ShimmerComponent = ({
     Component,
     {
       className: cn(
-        "not-prose inline-block bg-[length:200%_auto] bg-clip-text [-webkit-background-clip:text] text-transparent",
-        "bg-gradient-to-r from-muted-foreground/60 via-foreground via-50% to-muted-foreground/60",
+        "not-prose text-shimmer",
+        duration <= 1.5 && "text-shimmer-fast",
         className
       ),
-      style: {
-        animation: `text-shimmer ${duration}s ease-in-out infinite`,
-      },
     },
     children
   );
