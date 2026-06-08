@@ -581,29 +581,11 @@ function MessageMeta({
 
 function Loader() {
   return (
-    <div className="flex items-center gap-2 py-1 pl-4">
+    <div className="flex items-center py-1 pl-4">
       <span className="text-shimmer text-shimmer-fast text-base font-medium">
         Thinking
       </span>
-      <LoadingDots />
     </div>
-  );
-}
-
-function LoadingDots() {
-  return (
-    <span className="flex items-center gap-0.5" aria-hidden>
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="bg-muted-foreground/60 size-1 rounded-full"
-          style={{
-            animation: "bounce-dot 1.2s ease-in-out infinite",
-            animationDelay: `${i * 0.2}s`,
-          }}
-        />
-      ))}
-    </span>
   );
 }
 
