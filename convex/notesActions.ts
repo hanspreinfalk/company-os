@@ -5,7 +5,7 @@ import { v } from "convex/values";
 import { generateEmbedding, generateEmbeddings } from "../lib/embeddings";
 import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
-import { action, internalAction } from "./_generated/server";
+import { action, internalAction, type ActionCtx } from "./_generated/server";
 
 async function indexNote(
   ctx: { runMutation: typeof action.prototype },
@@ -215,30 +215,48 @@ export const agentUpdateNote = internalAction({
   },
 });
 
+async function findRelevantNotesForUser(
+  ctx: ActionCtx,
+  userId: Id<"users">,
+  query: string
+): Promise<Array<Doc<"notes">>> {
+  const embedding = await generateEmbedding(query);
+
+  const results = await ctx.vectorSearch("noteEmbeddings", "by_embedding", {
+    vector: embedding,
+    limit: 16,
+    filter: (q) => q.eq("userId", userId),
+  });
+
+  const resultsAboveThreshold = results.filter((result) => result._score > 0.3);
+  const embeddingIds = resultsAboveThreshold.map((result) => result._id);
+
+  return await ctx.runQuery(internal.notes.fetchNotesByEmbeddingIds, {
+    embeddingIds,
+  });
+}
+
 export const findRelevantNotes = internalAction({
   args: {
     query: v.string(),
     userId: v.id("users"),
   },
-  handler: async (ctx, args): Promise<Array<Doc<"notes">>> => {
-    const embedding = await generateEmbedding(args.query);
+  handler: async (ctx, args) => {
+    return await findRelevantNotesForUser(ctx, args.userId, args.query);
+  },
+});
 
-    const results = await ctx.vectorSearch("noteEmbeddings", "by_embedding", {
-      vector: embedding,
-      limit: 16,
-      filter: (q) => q.eq("userId", args.userId),
-    });
+export const searchNotesForChat = action({
+  args: {
+    query: v.string(),
+  },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
 
-    const resultsAboveThreshold = results.filter(
-      (result) => result._score > 0.3
-    );
-
-    const embeddingIds = resultsAboveThreshold.map((result) => result._id);
-
-    const notes = await ctx.runQuery(internal.notes.fetchNotesByEmbeddingIds, {
-      embeddingIds,
-    });
-
-    return notes;
+    return await findRelevantNotesForUser(ctx, userId, args.query);
   },
 });

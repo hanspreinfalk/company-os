@@ -35,6 +35,16 @@ const schema = defineSchema({
       filterFields: ["userId"],
     }),
 
+  connectorToolPreferences: defineTable({
+    userId: v.id("users"),
+    toolkitSlug: v.string(),
+    disabledToolSlugs: v.array(v.string()),
+    initialized: v.optional(v.boolean()),
+    updatedAt: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_userId_toolkitSlug", ["userId", "toolkitSlug"]),
+
   automationRuns: defineTable({
     userId: v.id("users"),
     automationKey: v.string(),

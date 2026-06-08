@@ -68,7 +68,7 @@ interface CreateNoteDialogProps {
   onNoteCreated?: (noteId: import("../../../convex/_generated/dataModel").Id<"notes">) => void;
 }
 
-function CreateNoteDialog({ open, onOpenChange, folderId, onNoteCreated }: CreateNoteDialogProps) {
+export function CreateNoteDialog({ open, onOpenChange, folderId, onNoteCreated }: CreateNoteDialogProps) {
   const createNote = useAction(api.notesActions.createNote);
 
   const form = useForm<z.infer<typeof noteFormSchema>>({

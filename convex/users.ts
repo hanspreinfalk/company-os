@@ -18,6 +18,14 @@ function getDisplayName(name?: string, email?: string): string {
   return "there";
 }
 
+export const getCurrentUserId = query({
+  args: {},
+  returns: v.union(v.id("users"), v.null()),
+  handler: async (ctx) => {
+    return await getAuthUserId(ctx);
+  },
+});
+
 export const getCurrentUser = query({
   args: {},
   returns: v.union(

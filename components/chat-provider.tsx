@@ -14,11 +14,6 @@ import {
   type ReactNode,
 } from "react";
 
-const convexSiteUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.replace(
-  /.cloud$/,
-  ".site"
-);
-
 interface ChatContextValue {
   messages: ReturnType<typeof useChat>["messages"];
   sendMessage: ReturnType<typeof useChat>["sendMessage"];
@@ -38,7 +33,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
-        api: `${convexSiteUrl}/api/chat`,
+        api: "/api/chat",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       }),
     [token]

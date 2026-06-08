@@ -21,6 +21,7 @@ import {
   MessageSquare,
   Monitor,
   Moon,
+  Plug,
   Settings,
   Sun,
   Trash2,
@@ -34,6 +35,7 @@ const navItems = [
   { label: "Chat", href: "/chat", icon: MessageSquare },
   { label: "Notes", href: "/notes", icon: FileText },
   { label: "Automations", href: "/automations", icon: Workflow },
+  { label: "Connectors", href: "/connectors", icon: Plug },
 ] as const;
 
 const themeOptions = [

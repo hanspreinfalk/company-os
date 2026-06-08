@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0-alpha.12",
+    "@ai-sdk/mcp": "^1.0.46",
     "@ai-sdk/openai": "^3.0.68",
     "@ai-sdk/react": "^3.0.199",
     "@clerk/ui": "^1.15.0",
+    "@composio/core": "^0.10.0",
     "@convex-dev/auth": "^0.0.87",
     "@hookform/resolvers": "^5.1.1",
     "@radix-ui/react-dialog": "^1.1.14",

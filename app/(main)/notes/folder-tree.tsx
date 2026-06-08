@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronRight,
   FileText,
+  FilePlus,
   Folder,
   FolderOpen,
   FolderPlus,
@@ -26,6 +27,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 import { Doc, Id } from "../../../convex/_generated/dataModel";
+import { CreateNoteDialog } from "./create-note-button";
 
 interface FolderNode {
   _id: Id<"folders">;
@@ -117,10 +119,9 @@ export function FolderTree({
   const folders = useQuery(api.folders.getUserFolders);
   const createFolder = useMutation(api.folders.createFolder);
   const [searchQuery, setSearchQuery] = useState("");
-  const [creatingAt, setCreatingAt] = useState<Id<"folders"> | "root" | null>(
-    null
-  );
+  const [creatingAt, setCreatingAt] = useState<Id<"folders"> | "root" | null>(null);
   const [newFolderName, setNewFolderName] = useState("");
+  const [rootNoteDialogOpen, setRootNoteDialogOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -226,19 +227,34 @@ export function FolderTree({
             Folders
           </span>
           {!isSearching && (
-            <button
-              onClick={() => {
-                setCreatingAt("root");
-                setTimeout(() => inputRef.current?.focus(), 50);
-              }}
-              className="text-muted-foreground/50 hover:text-muted-foreground rounded p-0.5 transition-colors"
-              title="New folder"
-            >
-              <FolderPlus className="size-3.5" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setRootNoteDialogOpen(true)}
+                className="text-muted-foreground/50 hover:text-muted-foreground rounded p-0.5 transition-colors"
+                title="New note at root"
+              >
+                <FilePlus className="size-3.5" />
+              </button>
+              <button
+                onClick={() => {
+                  setCreatingAt("root");
+                  setTimeout(() => inputRef.current?.focus(), 50);
+                }}
+                className="text-muted-foreground/50 hover:text-muted-foreground rounded p-0.5 transition-colors"
+                title="New folder"
+              >
+                <FolderPlus className="size-3.5" />
+              </button>
+            </div>
           )}
         </div>
       )}
+
+      <CreateNoteDialog
+        open={rootNoteDialogOpen}
+        onOpenChange={setRootNoteDialogOpen}
+        onNoteCreated={(id) => onSelectNote(id)}
+      />
 
       {/* New root folder inline input */}
       {!isSearching && creatingAt === "root" && (
@@ -476,6 +492,7 @@ function FolderItem({
     notesByFolder
   );
   const [expanded, setExpanded] = useState(containsSelected || isSearching);
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (containsSelected || (isSearching && hasSearchMatch)) {
@@ -594,6 +611,16 @@ function FolderItem({
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
+                    setExpanded(true);
+                    setNoteDialogOpen(true);
+                  }}
+                >
+                  <FilePlus className="mr-2 size-3.5" />
+                  New note
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setCreatingAt(node._id);
                     setTimeout(() => subfolderInputRef.current?.focus(), 50);
                   }}
@@ -682,6 +709,16 @@ function FolderItem({
           ))}
         </div>
       )}
+
+      <CreateNoteDialog
+        open={noteDialogOpen}
+        onOpenChange={setNoteDialogOpen}
+        folderId={node._id}
+        onNoteCreated={(id) => {
+          setExpanded(true);
+          onSelectNote(id);
+        }}
+      />
     </div>
   );
 }

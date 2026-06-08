@@ -363,17 +363,13 @@ function MessageTextPart({
 }) {
   if (!text) return null;
 
-  if (streaming) {
-    return (
-      <div className="whitespace-pre-wrap break-words">
-        {text}
-        <span className="bg-foreground/70 ml-0.5 inline-block h-[1.1em] w-0.5 animate-pulse align-text-bottom" />
-      </div>
-    );
-  }
-
   return (
-    <Markdown className="first:prose-p:mt-0 last:prose-p:mb-0">{text}</Markdown>
+    <div className="relative">
+      <Markdown className="first:prose-p:mt-0 last:prose-p:mb-0">{text}</Markdown>
+      {streaming && (
+        <span className="bg-foreground/70 ml-0.5 inline-block h-[1.1em] w-0.5 animate-pulse align-text-bottom" />
+      )}
+    </div>
   );
 }
 

@@ -10,6 +10,7 @@ const isProtectedRoute = createRouteMatcher([
   "/chat(.*)",
   "/notes(.*)",
   "/automations(.*)",
+  "/connectors(.*)",
 ]);
 
 export default convexAuthNextjsMiddleware(
