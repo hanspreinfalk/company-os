@@ -11,7 +11,7 @@ import { useAuthToken } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { DefaultChatTransport, UIMessage } from "ai";
 import { ArrowUp, Loader2, Trash2 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { api } from "../convex/_generated/api";
 
 function getTimeGreeting() {
@@ -55,17 +55,16 @@ export function ChatInterface() {
   const lastMessageIsUser =
     messages.length > 0 && messages[messages.length - 1].role === "user";
 
-  useEffect(() => {
-    if (hasConversation) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, hasConversation]);
+  function scrollToBottom() {
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+  }
 
   function submit(text: string) {
     const trimmed = text.trim();
     if (trimmed && !isProcessing) {
       sendMessage({ text: trimmed });
       setInput("");
+      requestAnimationFrame(scrollToBottom);
     }
   }
 
@@ -89,7 +88,7 @@ export function ChatInterface() {
       <div className="flex h-full min-h-0 flex-col items-center justify-center px-4 sm:px-6">
         <div className="w-full max-w-2xl">
           <div className="mb-8 flex items-center justify-center gap-2.5">
-            <CompanyLogo size="sm" className="rounded-md" />
+            {/* <CompanyLogo size="sm" className="rounded-md" /> */}
             <p className="font-serif text-foreground text-[1.65rem] leading-none font-normal tracking-tight">
               {getTimeGreeting()}, {displayName}
             </p>

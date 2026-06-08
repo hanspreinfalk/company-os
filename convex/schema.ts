@@ -5,11 +5,22 @@ import { v } from "convex/values";
 const schema = defineSchema({
   ...authTables,
 
+  folders: defineTable({
+    name: v.string(),
+    userId: v.id("users"),
+    parentFolderId: v.optional(v.id("folders")),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_userId_parentFolderId", ["userId", "parentFolderId"]),
+
   notes: defineTable({
     title: v.string(),
     body: v.string(),
     userId: v.id("users"),
-  }).index("by_userId", ["userId"]),
+    folderId: v.optional(v.id("folders")),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_userId_folderId", ["userId", "folderId"]),
 
   noteEmbeddings: defineTable({
     content: v.string(),

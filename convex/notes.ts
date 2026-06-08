@@ -13,6 +13,7 @@ const noteValidator = v.object({
   title: v.string(),
   body: v.string(),
   userId: v.id("users"),
+  folderId: v.optional(v.id("folders")),
 });
 
 export const getNote = query({

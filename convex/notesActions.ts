@@ -67,6 +67,7 @@ export const createNote = action({
   args: {
     title: v.string(),
     body: v.string(),
+    folderId: v.optional(v.id("folders")),
   },
   returns: v.id("notes"),
   handler: async (ctx, args) => {
@@ -75,13 +76,23 @@ export const createNote = action({
       throw new Error("User must be authenticated to create a note");
     }
 
-    return await indexNote(ctx, {
+    const noteId = await indexNote(ctx, {
       userId,
       title: args.title,
       body: args.body,
       automationKey: "index-note-embeddings",
       automationName: "Index note embeddings",
     });
+
+    if (args.folderId) {
+      await ctx.runMutation(internal.folders.moveNoteInternal, {
+        noteId,
+        userId,
+        folderId: args.folderId,
+      });
+    }
+
+    return noteId;
   },
 });
 
@@ -90,6 +101,7 @@ export const agentCreateNote = internalAction({
     userId: v.id("users"),
     title: v.string(),
     body: v.string(),
+    folderId: v.optional(v.id("folders")),
   },
   returns: v.object({
     id: v.id("notes"),
@@ -104,6 +116,15 @@ export const agentCreateNote = internalAction({
       automationKey: "index-note-embeddings",
       automationName: "Index note embeddings",
     });
+
+    // Set folderId after creation if provided
+    if (args.folderId) {
+      await ctx.runMutation(internal.folders.moveNoteInternal, {
+        noteId,
+        userId: args.userId,
+        folderId: args.folderId,
+      });
+    }
 
     return {
       id: noteId,

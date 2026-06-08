@@ -29,12 +29,18 @@ On any request to add, edit, import, save, update, or sync notes: your FIRST res
 
 ## Tools
 - findRelevantNotes(query) — search before answering or editing
-- listNotes() — get all notes and IDs
-- createNote(title, body) — new note; body MUST be valid markdown
+- listNotes() — get all notes and IDs (includes folderId)
+- listFolders() — get all folders (id, name, parentFolderId)
+- createFolder(name, parentFolderId?) — create a folder, optionally nested
+- createNote(title, body, folderId?) — new note, optionally in a folder
 - updateNote(noteId, title, body) — full body replacement; body MUST be valid markdown
+- moveNote(noteId, folderId?) — move a note to a folder (omit folderId to move to root)
 
 ## Markdown format (required for all note bodies)
 Every note body must be written in markdown: use \`# headings\`, \`**bold**\`, bullet lists, numbered lists, markdown tables (\`| col | col |\`), blockquotes, and \`[links](url)\`. Never store plain unstructured text when markdown would be clearer.
+
+## Folders
+Notes can be organized into folders (with optional subfolders). When creating notes that belong to a logical group (e.g. "team/hans-preinfalk.md"), create or find the matching folder and pass its folderId when creating the note. Use listFolders to check existing folders before creating duplicates. When a user asks to organize notes or move them to a folder, use moveNote.
 
 ## Interpreting user messages
 - **Question** ("who is the CTO?") → findRelevantNotes, then answer from results
@@ -126,7 +132,7 @@ http.route({
         }),
         createNote: tool({
           description:
-            "Create a new note. Use for new topics or individual profile notes (e.g. team/person.md). One person added to a roster often requires createNote for their profile PLUS updateNote on the roster — call this multiple times if needed.",
+            "Create a new note. Use for new topics or individual profile notes. Pass folderId to place it in a folder (use listFolders or createFolder first to get the ID).",
           parameters: z.object({
             title: z.string().describe("The note title"),
             body: z
@@ -134,11 +140,12 @@ http.route({
               .describe(
                 "The full note content in markdown (headings, tables, lists, links)"
               ),
+            folderId: z.string().nullable().describe("Folder ID to place this note in, or null for root"),
           }),
-          execute: async ({ title, body }) => {
+          execute: async ({ title, body, folderId }) => {
             const note = await ctx.runAction(
               internal.notesActions.agentCreateNote,
-              { userId, title, body }
+              { userId, title, body, folderId: (folderId ?? undefined) as Id<"folders"> | undefined }
             );
 
             return {
@@ -174,6 +181,48 @@ http.route({
               ...note,
               link: `/notes/${note.id}`,
             };
+          },
+        }),
+        listFolders: tool({
+          description: "List all folders. Use before creating a folder to avoid duplicates, or to find a folderId to pass when creating notes.",
+          parameters: z.object({}),
+          execute: async () => {
+            const folders = await ctx.runQuery(internal.folders.getFoldersForUser, { userId });
+            return folders.map((f) => ({
+              id: f._id,
+              name: f.name,
+              parentFolderId: f.parentFolderId ?? null,
+            }));
+          },
+        }),
+        createFolder: tool({
+          description: "Create a new folder. Pass parentFolderId to nest it inside another folder.",
+          parameters: z.object({
+            name: z.string().describe("Folder name"),
+            parentFolderId: z.string().nullable().describe("Parent folder ID for subfolders, or null for a root folder"),
+          }),
+          execute: async ({ name, parentFolderId }) => {
+            const folderId = await ctx.runMutation(internal.folders.createFolderInternal, {
+              name,
+              userId,
+              parentFolderId: (parentFolderId ?? undefined) as Id<"folders"> | undefined,
+            });
+            return { id: folderId, name };
+          },
+        }),
+        moveNote: tool({
+          description: "Move a note into a folder (or to root by omitting folderId).",
+          parameters: z.object({
+            noteId: z.string().describe("The note ID to move"),
+            folderId: z.string().nullable().describe("Target folder ID, or null to move to root"),
+          }),
+          execute: async ({ noteId, folderId }) => {
+            await ctx.runMutation(internal.folders.moveNoteInternal, {
+              noteId: noteId as Id<"notes">,
+              userId,
+              folderId: (folderId ?? undefined) as Id<"folders"> | undefined,
+            });
+            return { success: true };
           },
         }),
       },

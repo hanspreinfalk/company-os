@@ -37,7 +37,11 @@ const noteFormSchema = z.object({
   }),
 });
 
-export function CreateNoteButton() {
+interface CreateNoteButtonProps {
+  folderId?: import("../../../convex/_generated/dataModel").Id<"folders">;
+}
+
+export function CreateNoteButton({ folderId }: CreateNoteButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
@@ -46,7 +50,7 @@ export function CreateNoteButton() {
         <Plus />
         Create Note
       </Button>
-      <CreateNoteDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <CreateNoteDialog open={dialogOpen} onOpenChange={setDialogOpen} folderId={folderId} />
     </>
   );
 }
@@ -54,9 +58,10 @@ export function CreateNoteButton() {
 interface CreateNoteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  folderId?: import("../../../convex/_generated/dataModel").Id<"folders">;
 }
 
-function CreateNoteDialog({ open, onOpenChange }: CreateNoteDialogProps) {
+function CreateNoteDialog({ open, onOpenChange, folderId }: CreateNoteDialogProps) {
   const createNote = useAction(api.notesActions.createNote);
 
   const form = useForm<z.infer<typeof noteFormSchema>>({
@@ -74,6 +79,7 @@ function CreateNoteDialog({ open, onOpenChange }: CreateNoteDialogProps) {
       await createNote({
         title: values.title,
         body: values.body,
+        folderId,
       });
       toast.success("Note created successfully!");
       form.reset();
