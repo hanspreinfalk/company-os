@@ -134,6 +134,48 @@ export const agentCreateNote = internalAction({
   },
 });
 
+export const updateNote = action({
+  args: {
+    noteId: v.id("notes"),
+    title: v.string(),
+    body: v.string(),
+  },
+  returns: v.id("notes"),
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("User must be authenticated to update a note");
+    }
+
+    const existingNote = await ctx.runQuery(internal.notes.getNoteForUser, {
+      noteId: args.noteId,
+      userId,
+    });
+
+    if (!existingNote) {
+      throw new Error("Note not found");
+    }
+
+    const title = args.title.trim();
+    const body = args.body.trim();
+    if (!title) {
+      throw new Error("Title cannot be empty");
+    }
+    if (!body) {
+      throw new Error("Body cannot be empty");
+    }
+
+    return await indexNote(ctx, {
+      userId,
+      noteId: args.noteId,
+      title,
+      body,
+      automationKey: "reindex-note-embeddings",
+      automationName: "Reindex note embeddings",
+    });
+  },
+});
+
 export const agentUpdateNote = internalAction({
   args: {
     userId: v.id("users"),

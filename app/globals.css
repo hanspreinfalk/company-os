@@ -116,7 +116,7 @@
 
 @theme inline {
   --color-black: #000000;
-  --default-border-width: 0.5px;
+  --default-border-width: 1px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -183,16 +183,16 @@
   }
   [data-slot="separator"][data-orientation="horizontal"],
   hr {
-    height: 0.5px;
+    height: 1px;
   }
   [data-slot="separator"][data-orientation="vertical"] {
-    width: 0.5px;
+    width: 1px;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-base;
   }
   html {
-    @apply font-sans;
+    @apply font-sans text-base;
     color-scheme: light;
   }
   html.dark {
@@ -225,30 +225,30 @@
   .border-r,
   .border-x,
   .border-y {
-    border-width: 0.5px;
+    border-width: 1px;
   }
 
   .divide-y > :not(:last-child) {
-    border-bottom-width: 0.5px;
+    border-bottom-width: 1px;
   }
 
   .ring-1 {
-    --tw-ring-width: 0.5px;
+    --tw-ring-width: 1px;
   }
 
   [data-slot="card"] {
-    border-width: 0.5px;
+    border-width: 1px;
   }
 
   [data-slot="table-row"] {
     border-top-width: 0;
     border-left-width: 0;
     border-right-width: 0;
-    border-bottom-width: 0.5px;
+    border-bottom-width: 1px;
   }
 
   [data-slot="table-footer"] {
-    border-top-width: 0.5px;
+    border-top-width: 1px;
     border-left-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
@@ -256,9 +256,14 @@
 
   article.rounded-lg.border,
   article.rounded-xl.border {
-    border-width: 0.5px;
+    border-width: 1px;
     @apply border-border/50;
   }
+}
+
+@keyframes text-shimmer {
+  0% { background-position: 100% center; }
+  100% { background-position: 0% center; }
 }
 
 @keyframes orb-float {

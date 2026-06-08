@@ -31,7 +31,7 @@ export function AutomationsPage() {
     <div className="space-y-8">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Automations</h1>
-        <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
+        <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
           Background jobs that keep your notes indexed and searchable. Each run is
           logged with timing, status, and how many notes were updated.
         </p>
@@ -60,11 +60,11 @@ export function AutomationsPage() {
                   {automation.trigger}
                 </Badge>
               </div>
-              <h2 className="mb-1 text-sm font-medium">{automation.name}</h2>
-              <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+              <h2 className="mb-1 text-base font-medium">{automation.name}</h2>
+              <p className="text-muted-foreground mb-4 text-base leading-relaxed">
                 {automation.description}
               </p>
-              <div className="text-muted-foreground flex items-center justify-between text-xs">
+              <div className="text-muted-foreground flex items-center justify-between text-sm">
                 <span>{automationRuns.length} total runs</span>
                 <span>
                   {lastSuccess
@@ -85,8 +85,8 @@ export function AutomationsPage() {
       >
         <div className="flex items-center justify-between border-b border-border/50 px-5 py-4">
           <div>
-            <h2 className="text-sm font-medium">Run history</h2>
-            <p className="text-muted-foreground text-xs">
+            <h2 className="text-base font-medium">Run history</h2>
+            <p className="text-muted-foreground text-sm">
               Recent automation executions across your workspace
             </p>
           </div>
@@ -126,16 +126,16 @@ function RunHistoryRow({ run }: { run: Doc<"automationRuns"> }) {
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={run.status} />
-          <span className="text-sm font-medium">{run.automationName}</span>
+          <span className="text-base font-medium">{run.automationName}</span>
         </div>
         {run.message && (
-          <p className="text-muted-foreground line-clamp-2 text-sm">
+          <p className="text-muted-foreground line-clamp-2 text-base">
             {run.message}
           </p>
         )}
       </div>
 
-      <div className="text-muted-foreground grid shrink-0 grid-cols-2 gap-x-6 gap-y-1 text-xs sm:text-right">
+      <div className="text-muted-foreground grid shrink-0 grid-cols-2 gap-x-6 gap-y-1 text-sm sm:text-right">
         <div>
           <p className="text-foreground/70 mb-0.5 font-medium">Started</p>
           <p title={formatRunTime(run.startedAt)}>
@@ -200,8 +200,8 @@ function EmptyRunHistory() {
       <div className="bg-muted text-muted-foreground mb-4 flex size-12 items-center justify-center rounded-full">
         <Workflow className="size-5" />
       </div>
-      <p className="mb-1 text-sm font-medium">No automation runs yet</p>
-      <p className="text-muted-foreground max-w-sm text-sm">
+      <p className="mb-1 text-base font-medium">No automation runs yet</p>
+      <p className="text-muted-foreground max-w-sm text-base">
         Create or delete a note to trigger indexing automations. Runs will appear
         here with timing and status.
       </p>

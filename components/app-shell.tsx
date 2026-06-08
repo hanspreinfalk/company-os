@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { AppNav } from "./app-nav";
+import { ChatProvider } from "./chat-provider";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -14,24 +15,26 @@ export function AppShell({ children }: AppShellProps) {
   const isNotesRoot = pathname === "/notes";
 
   return (
-    <div className="bg-background flex h-screen flex-col overflow-hidden">
-      <AppNav />
-      <main
-        className={cn(
-          "flex min-h-0 flex-1 flex-col",
-          isChat || isNotesRoot
-            ? "overflow-hidden"
-            : "mx-auto w-full max-w-6xl overflow-y-auto px-6 py-8"
-        )}
-      >
-        {isNotesRoot ? (
-          <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl px-6 py-6">
-            {children}
-          </div>
-        ) : (
-          children
-        )}
-      </main>
-    </div>
+    <ChatProvider>
+      <div className="bg-background flex h-screen flex-col overflow-hidden">
+        <AppNav />
+        <main
+          className={cn(
+            "flex min-h-0 flex-1 flex-col",
+            isChat || isNotesRoot
+              ? "overflow-hidden"
+              : "mx-auto w-full max-w-6xl overflow-y-auto px-6 py-8"
+          )}
+        >
+          {isNotesRoot ? (
+            <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl px-6 py-6">
+              {children}
+            </div>
+          ) : (
+            children
+          )}
+        </main>
+      </div>
+    </ChatProvider>
   );
 }

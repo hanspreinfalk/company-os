@@ -74,7 +74,7 @@ export function SigninForm() {
       <div className="bg-muted/50 hidden w-1/2 flex-col justify-between border-r border-border/50 p-10 lg:flex">
         <div className="flex items-center gap-2.5">
           <CompanyLogo size="sm" />
-          <span className="max-w-xs truncate text-sm font-medium" title={APP_NAME}>
+          <span className="max-w-xs truncate text-base font-medium" title={APP_NAME}>
             {APP_NAME}
           </span>
         </div>
@@ -84,12 +84,12 @@ export function SigninForm() {
             <br />
             not guesswork.
           </h2>
-          <p className="text-muted-foreground max-w-md text-sm leading-relaxed">
+          <p className="text-muted-foreground max-w-md text-base leading-relaxed">
             A calm workspace for capturing notes and querying them with AI —
             built for teams that ship.
           </p>
         </div>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-muted-foreground text-sm">
           &copy; {new Date().getFullYear()} {APP_NAME}
         </p>
       </div>
@@ -97,7 +97,7 @@ export function SigninForm() {
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
         <div className="mb-8 flex items-center gap-2.5 lg:hidden">
           <CompanyLogo size="sm" />
-          <span className="max-w-xs truncate text-sm font-medium" title={APP_NAME}>
+          <span className="max-w-xs truncate text-base font-medium" title={APP_NAME}>
             {APP_NAME}
           </span>
         </div>
@@ -110,7 +110,7 @@ export function SigninForm() {
             <h1 className="text-2xl font-semibold tracking-tight">
               {step === "signIn" ? "Welcome back" : "Create account"}
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-base">
               {step === "signIn"
                 ? "Sign in to access your workspace."
                 : "Get started with your team workspace."}
@@ -150,7 +150,7 @@ export function SigninForm() {
                 )}
               />
               {form.formState.errors.root && (
-                <div className="text-destructive text-sm">
+                <div className="text-destructive text-base">
                   {form.formState.errors.root.message}
                 </div>
               )}
@@ -166,7 +166,7 @@ export function SigninForm() {
             <Button
               variant="link"
               type="button"
-              className="text-muted-foreground h-auto p-0 text-sm"
+              className="text-muted-foreground h-auto p-0 text-base"
               onClick={() => {
                 setStep(step === "signIn" ? "signUp" : "signIn");
                 form.reset();
@@ -179,7 +179,7 @@ export function SigninForm() {
             <p>
               <Link
                 href="/"
-                className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
               >
                 &larr; Back to home
               </Link>

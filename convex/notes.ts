@@ -85,6 +85,33 @@ export const createNoteWithEmbeddings = internalMutation({
   },
 });
 
+export const renameNote = mutation({
+  args: {
+    noteId: v.id("notes"),
+    title: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("User must be authenticated to rename a note");
+    }
+
+    const note = await ctx.db.get(args.noteId);
+    if (!note || note.userId !== userId) {
+      throw new Error("Note not found");
+    }
+
+    const title = args.title.trim();
+    if (!title) {
+      throw new Error("Title cannot be empty");
+    }
+
+    await ctx.db.patch(args.noteId, { title });
+    return null;
+  },
+});
+
 export const deleteNote = mutation({
   args: {
     noteId: v.id("notes"),

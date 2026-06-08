@@ -1,17 +1,17 @@
 "use client";
 
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import { CompanyLogo } from "@/components/company-logo";
 import Markdown from "@/components/markdown";
+import { useChatContext } from "@/components/chat-provider";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { useChat } from "@ai-sdk/react";
-import { useAuthToken } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
-import { DefaultChatTransport, UIMessage } from "ai";
-import { ArrowUp, Loader2, Trash2 } from "lucide-react";
+import { formatMessageTime } from "@/lib/format";
+import { UIMessage } from "ai";
+import { ArrowUp, Check, Copy, Loader2 } from "lucide-react";
 import React, { useRef, useState } from "react";
+import { toast } from "sonner";
 import { api } from "../convex/_generated/api";
 
 function getTimeGreeting() {
@@ -21,11 +21,6 @@ function getTimeGreeting() {
   return "Good evening";
 }
 
-const convexSiteUrl = process.env.NEXT_PUBLIC_CONVEX_URL?.replace(
-  /.cloud$/,
-  ".site"
-);
-
 const SUGGESTIONS = [
   "Summarize my most recent notes",
   "Create a note titled \"Weekly goals\"",
@@ -34,24 +29,12 @@ const SUGGESTIONS = [
 
 export function ChatInterface() {
   const [input, setInput] = useState("");
-  const token = useAuthToken();
   const currentUser = useQuery(api.users.getCurrentUser);
   const greetingName = currentUser?.name ?? "there";
-
-  const { messages, sendMessage, setMessages, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: `${convexSiteUrl}/api/chat`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }),
-    messages: [],
-    maxSteps: 10,
-  });
+  const { messages, sendMessage, status, isProcessing, hasConversation } =
+    useChatContext();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const isProcessing = status === "submitted" || status === "streaming";
-  const hasConversation = messages.some((m) => m.role === "user");
   const lastMessageIsUser =
     messages.length > 0 && messages[messages.length - 1].role === "user";
 
@@ -109,19 +92,6 @@ export function ChatInterface() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 justify-end px-4 py-2 sm:px-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setMessages([])}
-          className="text-muted-foreground hover:text-foreground gap-1.5"
-          disabled={isProcessing}
-        >
-          <Trash2 className="size-3.5" />
-          Clear chat
-        </Button>
-      </div>
-
       <div className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6">
         <div className="mx-auto w-full max-w-3xl space-y-6 py-4">
           {messages.map((message) => (
@@ -133,8 +103,8 @@ export function ChatInterface() {
         </div>
       </div>
 
-      <div className="shrink-0 border-t border-border/50 px-4 pt-3 pb-5 sm:px-6">
-        <div className="mx-auto w-full max-w-3xl">
+      <div className="shrink-0 px-4 pt-3 pb-5 sm:px-6">
+        <div className="mx-auto w-full max-w-2xl">
           <ChatComposer
             input={input}
             setInput={setInput}
@@ -182,7 +152,7 @@ function ChatComposer({
             onKeyDown={onKeyDown}
             placeholder="How can I help you today?"
             rows={3}
-            className="max-h-48 min-h-[5.5rem] resize-none overflow-y-auto border-none bg-transparent px-5 pt-5 pb-2 text-[15px] leading-relaxed shadow-none focus-visible:ring-0 dark:bg-transparent"
+            className="max-h-48 min-h-[5.5rem] resize-none overflow-y-auto border-none bg-transparent px-5 pt-5 pb-2 text-base leading-relaxed shadow-none focus-visible:ring-0 dark:bg-transparent"
             autoFocus
           />
           <div className="flex justify-end px-3 pb-3">
@@ -210,7 +180,7 @@ function ChatComposer({
                 type="button"
                 disabled={isProcessing}
                 onClick={() => onSuggestionClick(suggestion)}
-                className="bg-background text-muted-foreground hover:bg-muted/60 hover:text-foreground border-border/80 w-fit rounded-full border px-4 py-2 text-sm transition-colors disabled:pointer-events-none disabled:opacity-50"
+                className="bg-background text-muted-foreground hover:bg-muted/60 hover:text-foreground border-border/80 w-fit rounded-full border px-4 py-2 text-base transition-colors disabled:pointer-events-none disabled:opacity-50"
               >
                 {suggestion}
               </button>
@@ -224,30 +194,32 @@ function ChatComposer({
   return (
     <form
       onSubmit={onSubmit}
-      className="border-border bg-background focus-within:border-ring focus-within:ring-ring/30 flex items-end gap-3 rounded-2xl border-[1.5px] px-4 py-3.5 transition-colors focus-within:ring-[3px]"
+      className="bg-card border-border/80 focus-within:border-border flex flex-col rounded-[1.35rem] border shadow-sm transition-colors"
     >
       <Textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={onKeyDown}
         placeholder="Ask about your company…"
-        rows={2}
-        className="max-h-48 min-h-[3.25rem] flex-1 resize-none overflow-y-auto border-none bg-transparent p-0 text-base leading-relaxed shadow-none focus-visible:ring-0 dark:bg-transparent"
+        rows={3}
+        className="max-h-48 min-h-[5.5rem] resize-none overflow-y-auto border-none bg-transparent px-5 pt-5 pb-2 text-base leading-relaxed shadow-none focus-visible:ring-0 dark:bg-transparent"
         autoFocus
       />
-      <Button
-        type="submit"
-        size="icon"
-        className="mb-0.5 size-9 shrink-0 rounded-xl"
-        disabled={!input.trim() || isProcessing}
-        aria-label="Send message"
-      >
-        {isProcessing ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <ArrowUp className="size-4" />
-        )}
-      </Button>
+      <div className="flex justify-end px-3 pb-3">
+        <Button
+          type="submit"
+          size="icon"
+          className="size-8 shrink-0 rounded-lg"
+          disabled={!input.trim() || isProcessing}
+          aria-label="Send message"
+        >
+          {isProcessing ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <ArrowUp className="size-3.5" />
+          )}
+        </Button>
+      </div>
     </form>
   );
 }
@@ -256,18 +228,47 @@ interface ChatMessageProps {
   message: UIMessage;
 }
 
+function getMessageText(message: UIMessage): string {
+  return message.parts
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join("\n\n")
+    .trim();
+}
+
 function ChatMessage({ message }: ChatMessageProps) {
+  const { getMessageTimestamp } = useChatContext();
+  const [copied, setCopied] = useState(false);
   const currentStep = message.parts[message.parts.length - 1];
   const isUser = message.role === "user";
+  const messageText = getMessageText(message);
+  const timestamp = getMessageTimestamp(message.id);
+
+  async function handleCopy() {
+    if (!messageText) return;
+    try {
+      await navigator.clipboard.writeText(messageText);
+      setCopied(true);
+      toast.success("Copied to clipboard");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Failed to copy");
+    }
+  }
 
   return (
-    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+    <div
+      className={cn(
+        "flex flex-col gap-1.5",
+        isUser ? "items-end" : "items-start"
+      )}
+    >
       <div
         className={cn(
-          "max-w-[85%] text-sm leading-relaxed sm:max-w-[82%]",
+          "max-w-[85%] text-base leading-relaxed sm:max-w-[82%]",
           isUser
-            ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-3.5 py-2.5"
-            : "text-foreground px-0.5 py-1"
+            ? "bg-primary text-primary-foreground rounded-2xl px-3.5 py-2.5"
+            : "text-foreground py-1 pr-0.5 pl-4"
         )}
       >
         {currentStep?.type === "text" && (
@@ -287,13 +288,59 @@ function ChatMessage({ message }: ChatMessageProps) {
           />
         )}
       </div>
+
+      {messageText && timestamp !== undefined && (
+        <MessageMeta
+          timestamp={timestamp}
+          copied={copied}
+          onCopy={handleCopy}
+          align={isUser ? "end" : "start"}
+        />
+      )}
+    </div>
+  );
+}
+
+function MessageMeta({
+  timestamp,
+  copied,
+  onCopy,
+  align,
+}: {
+  timestamp: number;
+  copied: boolean;
+  onCopy: () => void;
+  align: "start" | "end";
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 px-1",
+        align === "end" ? "flex-row-reverse" : "flex-row pl-4"
+      )}
+    >
+      <span className="text-muted-foreground text-sm tabular-nums">
+        {formatMessageTime(timestamp)}
+      </span>
+      <button
+        type="button"
+        onClick={onCopy}
+        className="text-muted-foreground/70 hover:text-muted-foreground rounded p-1 transition-colors"
+        aria-label="Copy message"
+      >
+        {copied ? (
+          <Check className="size-3.5" />
+        ) : (
+          <Copy className="size-3.5" />
+        )}
+      </button>
     </div>
   );
 }
 
 function Loader() {
   return (
-    <div className="flex justify-start px-0.5 py-1">
+    <div className="flex justify-start py-1 pl-4">
       <ThinkingShimmer />
     </div>
   );
@@ -303,6 +350,8 @@ function getToolLabel(toolName?: string) {
   switch (toolName) {
     case "findRelevantNotes":
       return "Searching notes";
+    case "webSearch":
+      return "Searching web";
     case "listNotes":
       return "Listing notes";
     case "createNote":
@@ -316,7 +365,7 @@ function getToolLabel(toolName?: string) {
 
 function ThinkingShimmer({ label = "Thinking" }: { label?: string }) {
   return (
-    <Shimmer as="span" className="text-sm font-medium" duration={1.5}>
+    <Shimmer as="span" className="text-base font-medium" duration={1.5}>
       {label}
     </Shimmer>
   );
@@ -324,8 +373,8 @@ function ThinkingShimmer({ label = "Thinking" }: { label?: string }) {
 
 function ErrorMessage() {
   return (
-    <div className="flex justify-start">
-      <div className="bg-destructive/10 text-destructive rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-sm">
+    <div className="flex justify-start pl-4">
+      <div className="bg-destructive/10 text-destructive rounded-2xl px-3.5 py-2.5 text-base">
         Something went wrong. Please try again.
       </div>
     </div>

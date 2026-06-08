@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useChatContext } from "@/components/chat-provider";
 import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -22,6 +23,7 @@ import {
   Moon,
   Settings,
   Sun,
+  Trash2,
   Workflow,
 } from "lucide-react";
 import Link from "next/link";
@@ -44,6 +46,9 @@ export function AppNav() {
   const pathname = usePathname();
   const { setTheme, theme } = useTheme();
   const { signOut } = useAuthActions();
+  const { clearChat, hasConversation, isProcessing } = useChatContext();
+  const isChat =
+    pathname === "/chat" || pathname.startsWith("/chat/");
 
   return (
     <header className="bg-background/90 sticky top-0 z-10 border-b border-border/50 backdrop-blur-sm">
@@ -51,14 +56,28 @@ export function AppNav() {
         <Link href="/chat" className="flex items-center gap-2.5">
           <CompanyLogo size="sm" />
           <span
-            className="hidden max-w-[12rem] truncate text-sm font-medium md:inline lg:max-w-xs xl:max-w-md"
+            className="hidden max-w-[12rem] truncate text-base font-medium md:inline lg:max-w-xs xl:max-w-md"
             title={APP_NAME}
           >
             {APP_NAME}
           </span>
         </Link>
 
-        <DropdownMenu>
+        <div className="flex items-center gap-1">
+          {isChat && hasConversation && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearChat}
+              className="text-muted-foreground hover:text-foreground gap-1.5"
+              disabled={isProcessing}
+            >
+              <Trash2 className="size-3.5" />
+              Clear chat
+            </Button>
+          )}
+
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
@@ -122,7 +141,8 @@ export function AppNav() {
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

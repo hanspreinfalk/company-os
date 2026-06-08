@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.0-alpha.12",
     "@ai-sdk/openai": "^2.0.0-alpha.12",
     "@ai-sdk/react": "^2.0.0-alpha.12",
     "@clerk/ui": "^1.15.0",

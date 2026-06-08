@@ -12,7 +12,7 @@ export function Breadcrumb({
   return (
     <nav
       aria-label="Breadcrumb"
-      className={cn("text-muted-foreground flex items-center gap-1 text-sm", className)}
+      className={cn("text-muted-foreground flex items-center gap-1 text-base", className)}
     >
       {children}
     </nav>

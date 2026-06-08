@@ -39,9 +39,10 @@ const noteFormSchema = z.object({
 
 interface CreateNoteButtonProps {
   folderId?: import("../../../convex/_generated/dataModel").Id<"folders">;
+  onNoteCreated?: (noteId: import("../../../convex/_generated/dataModel").Id<"notes">) => void;
 }
 
-export function CreateNoteButton({ folderId }: CreateNoteButtonProps) {
+export function CreateNoteButton({ folderId, onNoteCreated }: CreateNoteButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
@@ -50,7 +51,12 @@ export function CreateNoteButton({ folderId }: CreateNoteButtonProps) {
         <Plus />
         Create Note
       </Button>
-      <CreateNoteDialog open={dialogOpen} onOpenChange={setDialogOpen} folderId={folderId} />
+      <CreateNoteDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        folderId={folderId}
+        onNoteCreated={onNoteCreated}
+      />
     </>
   );
 }
@@ -59,9 +65,10 @@ interface CreateNoteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   folderId?: import("../../../convex/_generated/dataModel").Id<"folders">;
+  onNoteCreated?: (noteId: import("../../../convex/_generated/dataModel").Id<"notes">) => void;
 }
 
-function CreateNoteDialog({ open, onOpenChange, folderId }: CreateNoteDialogProps) {
+function CreateNoteDialog({ open, onOpenChange, folderId, onNoteCreated }: CreateNoteDialogProps) {
   const createNote = useAction(api.notesActions.createNote);
 
   const form = useForm<z.infer<typeof noteFormSchema>>({
@@ -76,7 +83,7 @@ function CreateNoteDialog({ open, onOpenChange, folderId }: CreateNoteDialogProp
 
   async function onSubmit(values: z.infer<typeof noteFormSchema>) {
     try {
-      await createNote({
+      const noteId = await createNote({
         title: values.title,
         body: values.body,
         folderId,
@@ -84,6 +91,7 @@ function CreateNoteDialog({ open, onOpenChange, folderId }: CreateNoteDialogProp
       toast.success("Note created successfully!");
       form.reset();
       onOpenChange(false);
+      onNoteCreated?.(noteId);
     } catch (error) {
       console.error("Error creating note:", error);
       toast.error("Failed to create note. Please try again.");
@@ -124,7 +132,7 @@ function CreateNoteDialog({ open, onOpenChange, folderId }: CreateNoteDialogProp
                   <FormControl>
                     <Textarea
                       placeholder="Write markdown… # Heading, **bold**, lists, tables"
-                      className="min-h-32 font-mono text-sm"
+                      className="min-h-32 font-mono text-base"
                       {...field}
                     />
                   </FormControl>

@@ -11,7 +11,7 @@ export default function Home() {
         <div className="flex min-w-0 items-center gap-2.5">
           <CompanyLogo size="sm" />
           <span
-            className="truncate text-sm font-medium"
+            className="truncate text-base font-medium"
             title={APP_NAME}
           >
             {APP_NAME}
@@ -50,7 +50,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="text-muted-foreground border-t border-border/50 px-6 py-8 text-center text-xs">
+      <footer className="text-muted-foreground border-t border-border/50 px-6 py-8 text-center text-sm">
         Built with Convex and the Vercel AI SDK
       </footer>
     </div>

@@ -5,6 +5,13 @@ export function formatDuration(startedAt: number, completedAt?: number): string 
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
+export function formatMessageTime(timestamp: number): string {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(timestamp));
+}
+
 export function formatRunTime(timestamp: number): string {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
