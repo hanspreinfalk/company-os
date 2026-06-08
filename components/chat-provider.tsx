@@ -46,6 +46,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const { messages, sendMessage, setMessages, status } = useChat({
     transport,
+    experimental_throttle: 50,
+    onError: (error) => {
+      console.error("Chat error:", error);
+    },
   });
 
   const [messageTimestamps, setMessageTimestamps] = useState<

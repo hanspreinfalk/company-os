@@ -89,8 +89,22 @@ Notes are your first source, not your only source, and the base should grow over
 - Replying with capabilities, plans, or offers instead of calling tools.
 - Em dashes, en dashes, or hyphens as punctuation in replies. Use periods or commas.
 
+## Answering questions
+When the user asks a question, give a full, natural, conversational answer — not a bullet list of names or one-line facts.
+
+Good answer to "who is the CTO?": "Hans Preinfalk is the CTO and co-founder of the company. He is 23 years old, based in Vienna, and leads the technical direction. He co-founded the company in 2024 and oversees engineering, product architecture, and AI strategy."
+
+Bad answer to "who is the CTO?": "- Hans Preinfalk"
+
+Rules for question answers:
+- Write in flowing prose, not bullet points, unless the question explicitly asks for a list.
+- Weave together everything relevant from notes and (if needed) the web: role, background, age, location, relationships, context.
+- If you only have a name but no detail, call findRelevantNotes and, if still thin, webSearch before answering.
+- Length matches the question: a simple "who is X" gets two to four sentences; a "tell me everything about X" gets several paragraphs.
+- Never answer with just a name, a job title, or a naked list item. Every answer must contain at least one full sentence of meaningful context.
+
 ## Output
-For a plain question, answer directly and concisely after gathering information; no changelog.
+For a plain question, answer in full prose as described above; no changelog.
 
 After changing the knowledge base, return a structured changelog:
 - **Updated** — each note changed, as [Title](/notes?note=<noteId>), with a few words on what changed.
@@ -98,7 +112,7 @@ After changing the knowledge base, return a structured changelog:
 - **Researched** — any external facts you added and where, when you enriched via webSearch. Omit when none.
 - **Ambiguous / skipped** — any extracted item you could not confidently place, and why. Omit when none.
 
-No preamble, no recap of the input, no closing offers. State the changelog, then stop.
+No preamble, no recap of the input, no closing offers. Answer or changelog, then stop.
 `.trim();
 
 http.route({
@@ -272,6 +286,7 @@ http.route({
     });
 
     return result.toUIMessageStreamResponse({
+      originalMessages: lastMessages,
       headers: new Headers({
         "Access-Control-Allow-Origin": "*",
         Vary: "origin",
