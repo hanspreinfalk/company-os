@@ -3,12 +3,11 @@
 import { cn } from "@/lib/utils";
 import type { MotionProps } from "motion/react";
 import { motion } from "motion/react";
-import type { CSSProperties, ElementType, JSX } from "react";
-import { memo, useMemo } from "react";
+import type { ElementType, JSX } from "react";
+import { memo } from "react";
 
 type MotionHTMLProps = MotionProps & Record<string, unknown>;
 
-// Cache motion components at module level to avoid creating during render
 const motionComponentCache = new Map<
   keyof JSX.IntrinsicElements,
   React.ComponentType<MotionHTMLProps>
@@ -36,34 +35,21 @@ const ShimmerComponent = ({
   as: Component = "p",
   className,
   duration = 2,
-  spread = 2,
 }: TextShimmerProps) => {
   const MotionComponent = getMotionComponent(
     Component as keyof JSX.IntrinsicElements
-  );
-
-  const dynamicSpread = useMemo(
-    () => (children?.length ?? 0) * spread,
-    [children, spread]
   );
 
   return (
     <MotionComponent
       animate={{ backgroundPosition: "0% center" }}
       className={cn(
-        "relative inline-block bg-[length:250%_100%,auto] bg-clip-text text-transparent",
-        "[--shimmer-highlight:var(--color-background)] dark:[--shimmer-highlight:var(--color-foreground)]",
-        "[--bg:linear-gradient(90deg,#0000_calc(50%-var(--spread)),var(--shimmer-highlight),#0000_calc(50%+var(--spread)))] [background-repeat:no-repeat,padding-box]",
+        "not-prose inline-block bg-[length:250%_100%] bg-clip-text [-webkit-background-clip:text] text-transparent",
+        "bg-gradient-to-r from-muted-foreground from-30% via-neutral-400 via-50% to-muted-foreground to-70%",
+        "dark:from-muted-foreground dark:via-neutral-500 dark:to-muted-foreground",
         className
       )}
       initial={{ backgroundPosition: "100% center" }}
-      style={
-        {
-          "--spread": `${dynamicSpread}px`,
-          backgroundImage:
-            "var(--bg), linear-gradient(var(--color-muted-foreground), var(--color-muted-foreground))",
-        } as CSSProperties
-      }
       transition={{
         duration,
         ease: "linear",

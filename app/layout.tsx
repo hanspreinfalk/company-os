@@ -1,23 +1,18 @@
 import { Toaster } from "@/components/ui/sonner";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import { APP_NAME, COMPANY_NAME } from "@/lib/constants";
+import { APP_NAME } from "@/lib/constants";
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { ConvexClientProvider } from "./convex-client-provider";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: {
     template: `%s | ${APP_NAME}`,
     default: APP_NAME,
   },
-  description: `The operating system for your company's knowledge — by ${COMPANY_NAME}.`,
+  description:
+    "Knowledge management and AI-powered notes for deployment teams in San Francisco.",
 };
 
 export default function RootLayout({
@@ -28,7 +23,7 @@ export default function RootLayout({
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${geistSans.className} antialiased`}>
+        <body className="antialiased">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -36,7 +31,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ConvexClientProvider>{children}</ConvexClientProvider>
-            <Toaster position="top-right" />
+            <Toaster position="bottom-right" />
           </ThemeProvider>
         </body>
       </html>

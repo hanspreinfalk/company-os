@@ -90,7 +90,8 @@ function CreateNoteDialog({ open, onOpenChange }: CreateNoteDialogProps) {
         <DialogHeader>
           <DialogTitle>Create new note</DialogTitle>
           <DialogDescription>
-            Add a title and body. Your note will be indexed for AI search.
+            Add a title and markdown body. Use headings, lists, tables, and
+            links — your note will be indexed for AI search.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -116,8 +117,8 @@ function CreateNoteDialog({ open, onOpenChange }: CreateNoteDialogProps) {
                   <FormLabel>Body</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Write your note..."
-                      className="min-h-32"
+                      placeholder="Write markdown… # Heading, **bold**, lists, tables"
+                      className="min-h-32 font-mono text-sm"
                       {...field}
                     />
                   </FormControl>

@@ -1,3 +1,3 @@
-export const APP_NAME = "Company OS";
-export const COMPANY_NAME = "The Deployment Company of San Francisco";
-export const COMPANY_SHORT_NAME = "Deployment Co.";
+export const APP_NAME = "The Deploy Company of SF.";
+export const COMPANY_NAME = APP_NAME;
+export const COMPANY_SHORT_NAME = "The Deployment Co.";

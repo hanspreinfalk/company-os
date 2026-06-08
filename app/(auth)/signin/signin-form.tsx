@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { COMPANY_NAME } from "@/lib/constants";
+import { APP_NAME } from "@/lib/constants";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -71,10 +71,12 @@ export function SigninForm() {
 
   return (
     <div className="bg-background flex min-h-screen">
-      <div className="bg-muted/40 hidden w-1/2 flex-col justify-between p-10 lg:flex">
+      <div className="bg-muted/50 hidden w-1/2 flex-col justify-between border-r border-border/50 p-10 lg:flex">
         <div className="flex items-center gap-2.5">
           <CompanyLogo size="sm" />
-          <span className="text-sm font-medium">{COMPANY_NAME}</span>
+          <span className="max-w-xs truncate text-sm font-medium" title={APP_NAME}>
+            {APP_NAME}
+          </span>
         </div>
         <div className="space-y-4">
           <h2 className="text-3xl font-semibold tracking-tight">
@@ -88,17 +90,22 @@ export function SigninForm() {
           </p>
         </div>
         <p className="text-muted-foreground text-xs">
-          &copy; {new Date().getFullYear()} {COMPANY_NAME}
+          &copy; {new Date().getFullYear()} {APP_NAME}
         </p>
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
         <div className="mb-8 flex items-center gap-2.5 lg:hidden">
           <CompanyLogo size="sm" />
-          <span className="text-sm font-medium">{COMPANY_NAME}</span>
+          <span className="max-w-xs truncate text-sm font-medium" title={APP_NAME}>
+            {APP_NAME}
+          </span>
         </div>
 
-        <div className="bg-card w-full max-w-md space-y-6 rounded-xl border p-8 shadow-sm">
+        <div
+          data-slot="card"
+          className="bg-card w-full max-w-md space-y-6 rounded-xl border border-border/50 p-8 shadow-xs"
+        >
           <div className="space-y-1 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               {step === "signIn" ? "Welcome back" : "Create account"}

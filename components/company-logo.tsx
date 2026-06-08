@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import logo from "@/assets/logo.png";
 
 interface CompanyLogoProps {
   className?: string;
@@ -6,21 +8,19 @@ interface CompanyLogoProps {
 }
 
 const sizeClasses = {
-  sm: "size-7 text-sm",
-  md: "size-8 text-base",
-  lg: "size-14 text-2xl",
+  sm: "size-7",
+  md: "size-8",
+  lg: "size-14",
 };
 
 export function CompanyLogo({ className, size = "md" }: CompanyLogoProps) {
   return (
-    <div
-      className={cn(
-        "bg-foreground text-background flex shrink-0 items-center justify-center rounded-md font-semibold",
-        sizeClasses[size],
-        className
-      )}
-    >
-      D
-    </div>
+    <Image
+      src={logo}
+      alt="Company logo"
+      width={size === "lg" ? 56 : size === "sm" ? 28 : 32}
+      height={size === "lg" ? 56 : size === "sm" ? 28 : 32}
+      className={cn("shrink-0 rounded-md", sizeClasses[size], className)}
+    />
   );
 }
