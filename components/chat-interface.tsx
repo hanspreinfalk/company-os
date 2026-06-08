@@ -125,7 +125,7 @@ export function ChatInterface() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6">
-        <div className="mx-auto w-full max-w-3xl space-y-6 py-4">
+        <div className="mx-auto w-full max-w-3xl space-y-6 pt-4 pb-32">
           {messages.map((message) => (
             <ChatMessage
               key={message.id}
