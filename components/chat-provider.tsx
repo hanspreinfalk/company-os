@@ -9,6 +9,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -34,33 +35,38 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 export function ChatProvider({ children }: { children: ReactNode }) {
   const token = useAuthToken();
 
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: `${convexSiteUrl}/api/chat`,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }),
+    [token]
+  );
+
   const { messages, sendMessage, setMessages, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: `${convexSiteUrl}/api/chat`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }),
-    messages: [],
+    transport,
     maxSteps: 10,
   });
 
   const [messageTimestamps, setMessageTimestamps] = useState<
     Record<string, number>
   >({});
+  const trackedMessageIds = useRef(new Set<string>());
 
   useEffect(() => {
-    setMessageTimestamps((prev) => {
-      let changed = false;
-      const next = { ...prev };
-      for (const message of messages) {
-        if (!next[message.id]) {
-          next[message.id] = Date.now();
-          changed = true;
-        }
+    const newTimestamps: Record<string, number> = {};
+
+    for (const message of messages) {
+      if (!trackedMessageIds.current.has(message.id)) {
+        trackedMessageIds.current.add(message.id);
+        newTimestamps[message.id] = Date.now();
       }
-      return changed ? next : prev;
-    });
+    }
+
+    if (Object.keys(newTimestamps).length > 0) {
+      setMessageTimestamps((prev) => ({ ...prev, ...newTimestamps }));
+    }
   }, [messages]);
 
   const isProcessing = status === "submitted" || status === "streaming";
@@ -69,6 +75,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const clearChat = useCallback(() => {
     setMessages([]);
     setMessageTimestamps({});
+    trackedMessageIds.current.clear();
   }, [setMessages]);
 
   const getMessageTimestamp = useCallback(

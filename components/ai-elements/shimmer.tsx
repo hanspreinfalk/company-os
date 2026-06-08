@@ -22,12 +22,12 @@ const ShimmerComponent = ({
     Component,
     {
       className: cn(
-        "not-prose inline-block bg-[length:250%_100%] bg-clip-text [-webkit-background-clip:text] text-transparent",
-        "bg-gradient-to-r from-muted-foreground from-30% via-foreground via-50% to-muted-foreground to-70%",
+        "not-prose inline-block bg-[length:200%_auto] bg-clip-text [-webkit-background-clip:text] text-transparent",
+        "bg-gradient-to-r from-muted-foreground/60 via-foreground via-50% to-muted-foreground/60",
         className
       ),
       style: {
-        animation: `text-shimmer ${duration}s linear infinite`,
+        animation: `text-shimmer ${duration}s ease-in-out infinite`,
       },
     },
     children

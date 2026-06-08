@@ -261,8 +261,14 @@
   }
 }
 
+@layer components {
+  .prose :where(table thead, table th) {
+    border: 0;
+  }
+}
+
 @keyframes text-shimmer {
-  0% { background-position: 100% center; }
+  0% { background-position: 200% center; }
   100% { background-position: 0% center; }
 }
 
